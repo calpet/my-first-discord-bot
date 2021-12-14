@@ -5,10 +5,18 @@ from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-class RoastBotClient(discord.Client):
+client = discord.Client()
 
-    async def on_ready(self):
-        print('Logged on as {0}.'.format(self.user))
+@client.event
+async def on_ready():
+    print('Logged on as: {0}.'.format(client.user))
 
-client = RoastBotClient()
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+        
+    if(message.content == '!roast'):
+        await message.channel.send('Ur ugly lol')
+
 client.run(TOKEN)
