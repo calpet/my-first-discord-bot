@@ -1,11 +1,19 @@
 import discord
 import os
-from dotenv import load_dotenv
+import requests as req
+import json
+import re
+import string
 
-load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 client = discord.Client()
+
+def get_roast(name):
+    res = req.get(os.getenv('API_URL') + name)
+    json_data = json.loads(res.text)
+    return json_data['insult']
+
 
 @client.event
 async def on_ready():
@@ -16,7 +24,14 @@ async def on_message(message):
     if message.author == client.user:
         return
         
-    if message.content == '!roast':
-        await message.channel.send('This is a roast.')
+    if message.content.startswith('!roast'):
+        # Spaghetti code in order to not get errors when I pass a discord UID to an API request.
+        pattern = r'[' + string.punctuation + ']'
+        uid = message.author.mention
+        stripped_uid = re.sub(pattern, '', uid)
+        roast = get_roast(stripped_uid)
+        roast = roast.replace(stripped_uid, uid)
+
+        await message.channel.send(roast)
 
 client.run(TOKEN)
