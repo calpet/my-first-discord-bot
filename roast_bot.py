@@ -16,7 +16,7 @@ async def on_message(message):
     if message.author == client.user:
         return
         
-    if(message.content == '!roast'):
+    if message.content == '!roast':
         await message.channel.send('Ur ugly lol')
 
 client.run(TOKEN)
