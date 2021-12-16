@@ -14,24 +14,27 @@ def get_roast(name):
     json_data = json.loads(res.text)
     return json_data['insult']
 
+def handle_request(message):
+    # Spaghetti code in order to not get errors when I pass a discord UID to an API request.
+    pattern = r'[' + string.punctuation + ']'
+    uid = message.content.split()[1]
+    stripped_uid = re.sub(pattern, '', uid)
+    result = get_roast(stripped_uid).replace(stripped_uid, uid)
+    return result
 
 @client.event
 async def on_ready():
     print('Logged on as: {0}.'.format(client.user))
 
+# This is the event handler where we add our custom commands.
 @client.event
 async def on_message(message):
+    # Prevent infinite bot loops.
     if message.author == client.user:
         return
         
     if message.content.startswith('!roast'):
-        # Spaghetti code in order to not get errors when I pass a discord UID to an API request.
-        pattern = r'[' + string.punctuation + ']'
-        uid = message.author.mention
-        stripped_uid = re.sub(pattern, '', uid)
-        roast = get_roast(stripped_uid)
-        roast = roast.replace(stripped_uid, uid)
-
+        roast = handle_request(message)
         await message.channel.send(roast)
 
 client.run(TOKEN)
